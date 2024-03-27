@@ -1,0 +1,3 @@
+OfficeActivity
+| where UserId =~ '' // email address of user
+| where Operation == "New-InboxRule"

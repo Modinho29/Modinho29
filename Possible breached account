@@ -1,0 +1,15 @@
+//UPN of effected users
+let users = dynamic([""]);
+UnifiedSignInLogs
+| where UserPrincipalName in~ (users)
+    and TimeGenerated > ago(7d)
+    and ResultType == 0  //result type 0 is a successful sign in
+// extend DeviceDetail into seperate columns
+| extend DisplayName = tostring(parse_json(DeviceDetail).displayName)
+| extend TrustType = tostring(parse_json(DeviceDetail).trustType)
+| extend DeviceId = tostring(parse_json(DeviceDetail).deviceId)
+// search for sign-ins where device id is empty, indicating no compliant device and potentially AITM
+| where isempty(DeviceId)
+    // common apps used by attackers after gaining session tokens / credentials
+    and AppDisplayName in ("OfficeHome", "ExchangeOnline")
+| project TimeGenerated, UserPrincipalName, IPAddress, Location, DisplayName, TrustType, DeviceId, AppDisplayName

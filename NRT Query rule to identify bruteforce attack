@@ -1,0 +1,37 @@
+Suppose you want to monitor login activities to your network and identify when a user has an unusually high number of failed login attempts, which could suggest a brute force attack or a compromised account.
+
+KQL Analytics Rule:
+
+
+let baseline = 5; // Average number of failed logins to consider as normal
+let threshold = 3; // Threshold factor to identify anomaly
+SecurityEvent
+| where EventID == 4625 // Event ID for failed logins in Windows security logs
+| summarize CountFailedLogins = count() by AccountName, bin(TimeGenerated, 1h) // Count failed logins per hour per account
+| where CountFailedLogins > (baseline * threshold) // Filter accounts with failed logins exceeding the threshold
+| project TimeGenerated, AccountName, CountFailedLogins, Anomaly = (CountFailedLogins > (baseline * threshold))
+
+
+
+Explanation:
+Define Baseline and Threshold:
+
+baseline is set to 5, representing a normal number of failed logins.
+threshold is set to 3, meaning any account with failed logins more than three times the baseline will be considered anomalous.
+Filter Event Logs:
+
+The query filters SecurityEvent logs for Event ID 4625, which corresponds to failed login attempts.
+Summarize Data:
+
+It summarizes the data to count the number of failed logins (CountFailedLogins) per account (AccountName) per hour.
+Identify Anomalies:
+
+The query then filters for accounts where the count of failed logins in any hour exceeds the baseline times the threshold.
+Project Relevant Information:
+
+It projects the TimeGenerated, AccountName, CountFailedLogins, and a flag indicating whether it's an anomaly.
+Implementation:
+This rule should be implemented in the Analytics section of Microsoft Sentinel.
+Adjust the baseline and threshold values based on your environment’s normal activity and tolerance for risk.
+You may also want to include additional context or join with other tables for more comprehensive insights.
+This example provides a basic structure for an anomaly-based rule. In a real-world scenario, you'd tailor the logic to fit the specific patterns and behaviors relevant to your environment, and you might use more sophisticated statistical methods or machine learning models available in KQL.

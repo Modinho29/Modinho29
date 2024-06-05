@@ -1,4 +1,4 @@
-let users = dynamic(["mohamed.mahomud@supportingeducation.com"]);
+let users = dynamic(["user.pan@outlook.com"]);
 UnifiedSignInLogs
 | where UserPrincipalName in~ (users)
     and TimeGenerated > ago(7d)
